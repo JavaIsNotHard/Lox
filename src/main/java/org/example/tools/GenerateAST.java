@@ -27,11 +27,13 @@ public class GenerateAST {
         String path = outputDir + "/" + basename + ".java";
         PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8);
 
-        writer.println("package org.package.lox");
+        writer.println("package org.example.lox;");
         writer.println();
-        writer.println("import java.util.List");
+        writer.println("import java.util.List;");
         writer.println();
         writer.println("abstract class " + basename + " {");
+
+        defineVisitor(writer, basename, types);
 
         for (String type : types) {
             String className = type.split(":")[0].trim();
@@ -39,21 +41,43 @@ public class GenerateAST {
             defineType(writer, basename, className, fields);
         }
 
+        writer.println();
+        writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+
         writer.println("}");
         writer.close();
     }
 
+    private static void defineVisitor (PrintWriter writer, String baseName, List<String> types) {
+        writer.println("  interface Visitor<R> {");
+
+        for (String type : types) {
+            String typeName = type.split(":")[0].trim();
+            writer.println("    R visit" + typeName + baseName + "(" +
+                    typeName + " " + baseName.toLowerCase() + ");");
+        }
+
+        writer.println("  }");
+    }
+
     public static void defineType(PrintWriter writer, String baseName, String className, String fieldList) {
-        writer.println(" static class " + className + " extends " + baseName + " {");
+        writer.println("  static class " + className + " extends " + baseName + " {");
 
         writer.println("    " + className + "(" + fieldList + ") {");
 
-        String[] fields = fieldList.split(",");
+        String[] fields = fieldList.split(", ");
         for (String field : fields) {
             String name = field.split(" ")[1];
-            writer.println("    this." + name + " = " + name + ";");
+            writer.println("      this." + name + " = " + name + ";");
         }
 
+        writer.println("    }");
+
+        writer.println();
+        writer.println("    @Override");
+        writer.println("    <R> R accept(Visitor<R> visitor) {");
+        writer.println("      return visitor.visit" +
+                className + baseName + "(this);");
         writer.println("    }");
 
         writer.println();
@@ -62,6 +86,7 @@ public class GenerateAST {
         }
 
         writer.println("  }");
+        writer.println();
     }
 
 }
