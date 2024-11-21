@@ -1,4 +1,4 @@
-package org.example;
+package org.example.lox;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,7 +7,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
-import org.example.Scanner;
 
 public class Lox {
 
@@ -36,7 +35,7 @@ public class Lox {
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.println(">");
+            System.out.print("> ");
             String line = reader.readLine();
             if (line == null) {
                 break;
