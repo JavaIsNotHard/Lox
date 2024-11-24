@@ -4,6 +4,29 @@ import org.example.lox.TokenType.*;
 
 public class Interpreter implements Expr.Visitor<Object> {
 
+    void interpret(Expr expr) {
+        try {
+            Object value = evaluate(expr);
+            System.out.println(stringify(value));
+        } catch (RuntimeError e) {
+            Lox.runtimeError(e);
+        }
+    }
+
+    private String stringify(Object object) {
+        if (object == null) return "nil";
+        if (object instanceof Double) {
+            String text = object.toString();
+            // if integer but has .0 because java's double data type then strip the precision and return only the number
+            if (text.endsWith(".0")) {
+                text = text.substring(0, text.length() - 2);
+            }
+            return text;
+        }
+
+        return object.toString();
+    }
+
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
@@ -43,7 +66,8 @@ public class Interpreter implements Expr.Visitor<Object> {
                 if (left instanceof String && right instanceof String) {
                     return (String) left + (String) right;
                 }
-                break;
+
+                throw new RuntimeError(expr.operator, "Operands must be two numbers or two strings");
             case MINUS:
                 checkNumberOperand(expr.operator, left, right);
                 return (double) left - (double) right;
