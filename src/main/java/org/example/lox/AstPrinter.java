@@ -27,6 +27,11 @@ public class AstPrinter implements Expr.Visitor<String> {
         return paranthesize(expr.operator.lexeme, expr.right);
     }
 
+    @Override
+    public String visitVariableExpr(Expr.Variable expr) {
+        return "";
+    }
+
     private String paranthesize(String name, Expr... exprs) {
         StringBuilder sb = new StringBuilder();
 

@@ -23,6 +23,30 @@ public class Parser {
         return statements;
     }
 
+    private Stmt declaration() {
+        try {
+            if (match(TokenType.VAR)) return varDeclaration();
+
+            return statements();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(TokenType.IDENTIFIER, "Expected identifier");
+
+        Expr initializer = null;
+        if (match(TokenType.EQUAL)) {
+            initializer = expression();
+        }
+
+        consume(TokenType.SEMICOLON, "Expected semicolon after var declaration");
+
+        return new Stmt.Var(name, initializer);
+    }
+
     private Stmt statements() {
         if (match(TokenType.PRINT)) return printStatement();
 
@@ -111,6 +135,8 @@ public class Parser {
         if (match(TokenType.NUMBER, TokenType.STRING)) {
             return new Expr.Literal(previous().literal);
         }
+
+        if (match(TokenType.IDENTIFIER)) return new Expr.Variable(previous());
 
         if (match(TokenType.LEFT_PARENTHESIS)) {
             Expr expr = expression();
